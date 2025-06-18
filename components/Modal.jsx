@@ -94,8 +94,17 @@ const AmenityIcon = ({ amenity }) => {
   );
 };
 
+// Helper function to strip HTML tags and get clean text
+const stripHtmlTags = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  return html.replace(/<[^>]*>/g, '').trim();
+};
+
 export default function Modal({ isOpen, onClose, data, type }) {
   if (!isOpen) return null;
+
+  // Clean the description text by removing HTML tags
+  const cleanDescription = stripHtmlTags(data?.description || data?.fullDescription);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -115,7 +124,7 @@ export default function Modal({ isOpen, onClose, data, type }) {
             <div className="flex items-center justify-between mb-6">
               <StarRating rating={data?.starRating} />
             </div>
-            <p className="text-gray-700 mb-6">{data?.fullDescription || 'No description available.'}</p>
+            <p className="text-gray-700 mb-6">{cleanDescription || 'No description available.'}</p>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-semibold mb-3">Hotel Amenities:</h4>
@@ -161,7 +170,7 @@ export default function Modal({ isOpen, onClose, data, type }) {
               <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 00-7 2.9V8h14V5.9A10 10 0 0012 2zm0 16a6 6 0 01-6-6H2v-2a2 2 0 012-2h2a2 2 0 012 2v2H6a6 6 0 016 6z" /></svg>
               <span className="text-gray-600">{data?.country || 'Unknown'}</span>
             </div>
-            <p className="text-gray-700 mb-6">{data?.description || 'No description available.'}</p>
+            <p className="text-gray-700 mb-6">{stripHtmlTags(data?.description) || 'No description available.'}</p>
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-blue-600">
                 <strong>URL:</strong> {data?.url || '#'}

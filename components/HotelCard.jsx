@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, Wifi, Waves, Utensils, Coffee, Dumbbell, Car } from 'lucide-react';
+import { Star, Wifi, Waves, Utensils, Coffee, Dumbbell, Car, MapPin, Shield, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const ImageSlider = ({ images }) => {
@@ -27,7 +27,7 @@ const ImageSlider = ({ images }) => {
     <div className="relative w-full h-full group">
       <img 
         src={images?.[currentIndex] || '/images/placeholder.jpg'} 
-        alt="Slider" 
+        alt="Hotel" 
         className="w-full h-full object-cover"
       />
       {images?.length > 1 && (
@@ -77,24 +77,42 @@ const StarRating = ({ rating }) => {
 };
 
 const AmenityIcon = ({ amenity }) => {
-  const icons = {
-    'Free WiFi': <Wifi size={16} />,
-    'Swimming Pool': <Waves size={16} />,
-    'Restaurant': <Utensils size={16} />,
-    'Spa': <Coffee size={16} />,
-    'Gym': <Dumbbell size={16} />,
-    'Parking': <Car size={16} />,
+  const getIconForAmenity = (amenityName) => {
+    const lowerAmenity = amenityName.toLowerCase();
+    if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) return <Wifi size={16} />;
+    if (lowerAmenity.includes('pool') || lowerAmenity.includes('swimming')) return <Waves size={16} />;
+    if (lowerAmenity.includes('restaurant') || lowerAmenity.includes('dining')) return <Utensils size={16} />;
+    if (lowerAmenity.includes('spa') || lowerAmenity.includes('massage')) return <Coffee size={16} />;
+    if (lowerAmenity.includes('gym') || lowerAmenity.includes('fitness')) return <Dumbbell size={16} />;
+    if (lowerAmenity.includes('parking') || lowerAmenity.includes('car')) return <Car size={16} />;
+    if (lowerAmenity.includes('security') || lowerAmenity.includes('safe')) return <Shield size={16} />;
+    if (lowerAmenity.includes('conditioning') || lowerAmenity.includes('air')) return <Zap size={16} />;
+    return <MapPin size={16} />;
   };
 
   return (
-    <div className="flex items-center space-x-2 text-sm">
-      {icons[amenity] || <div className="w-4 h-4 bg-gray-300 rounded-full" />}
+    <div className="flex items-center space-x-2 text-sm text-gray-600">
+      {getIconForAmenity(amenity)}
       <span>{amenity}</span>
     </div>
   );
 };
 
+// Helper function to strip HTML tags and get clean text
+const stripHtmlTags = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  return html.replace(/<[^>]*>/g, '').trim();
+};
+
+// Helper function to render HTML content safely
+const createMarkup = (htmlContent) => {
+  return { __html: htmlContent };
+};
+
 export default function HotelCard({ hotel, setSelectedModal }) {
+  // Get clean description text
+  const cleanDescription = stripHtmlTags(hotel?.description);
+  
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-lg">
       <div className="h-64">
@@ -105,23 +123,67 @@ export default function HotelCard({ hotel, setSelectedModal }) {
           <h3 className="text-2xl font-bold text-gray-800">{hotel?.name || 'Unnamed Hotel'}</h3>
           <StarRating rating={hotel?.starRating} />
         </div>
-        <p className="text-gray-600 mb-4">{hotel?.description || 'No description available.'}</p>
-        <button
-          onClick={() => setSelectedModal({ type: 'hotel', data: hotel })}
-          className="text-blue-600 hover:text-blue-800 font-medium"
-        >
-          Read more
-        </button>
-        <div className="mt-4 pt-4 border-t">
-          <h4 className="font-semibold mb-2">Amenities:</h4>
+        
+        {/* Description with truncation */}
+        <div className="mb-4">
+          <p className="text-gray-600 line-clamp-3">
+            {cleanDescription || 'No description available.'}
+          </p>
+          {cleanDescription && cleanDescription.length > 150 && (
+            <button
+              onClick={() => setSelectedModal({ 
+                type: 'hotel', 
+                data: {
+                  ...hotel,
+                  // Pass both original HTML and clean text versions
+                  description: hotel?.description,
+                  cleanDescription: cleanDescription
+                }
+              })}
+              className="text-blue-600 hover:text-blue-800 font-medium mt-2"
+            >
+              Read more
+            </button>
+          )}
+        </div>
+
+        {/* Hotel Amenities */}
+        <div className="mb-4 pb-4 border-b">
+          <h4 className="font-semibold mb-2 text-gray-800">Hotel Amenities:</h4>
           {Array.isArray(hotel?.amenities) && hotel.amenities.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2">
-              {hotel.amenities.slice(0, 4).map((amenity, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {hotel.amenities.slice(0, 6).map((amenity, i) => (
                 <AmenityIcon key={i} amenity={amenity} />
               ))}
+              {hotel.amenities.length > 6 && (
+                <div className="text-sm text-blue-600 cursor-pointer hover:text-blue-800"
+                     onClick={() => setSelectedModal({ type: 'hotel', data: hotel })}>
+                  +{hotel.amenities.length - 6} more amenities
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-gray-500 text-sm">No amenities listed.</p>
+          )}
+        </div>
+
+        {/* Room Amenities */}
+        <div>
+          <h4 className="font-semibold mb-2 text-gray-800">Room Amenities:</h4>
+          {Array.isArray(hotel?.roomAmenities) && hotel.roomAmenities.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {hotel.roomAmenities.slice(0, 6).map((amenity, i) => (
+                <AmenityIcon key={`room-${i}`} amenity={amenity} />
+              ))}
+              {hotel.roomAmenities.length > 6 && (
+                <div className="text-sm text-blue-600 cursor-pointer hover:text-blue-800"
+                     onClick={() => setSelectedModal({ type: 'hotel', data: hotel })}>
+                  +{hotel.roomAmenities.length - 6} more room amenities
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No room amenities listed.</p>
           )}
         </div>
       </div>
