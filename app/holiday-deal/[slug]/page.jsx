@@ -32,52 +32,25 @@ export default function HolidayDealPage({ params }) {
     async function loadDeal() {
       try {
         setLoading(true);
+        setError(null);
         const slug = await getSlug();
+        
+        if (!slug) {
+          throw new Error('No slug provided');
+        }
+        
         const data = await fetchDealBySlug(slug);
-        console.log('Deal Data Set:', JSON.stringify(data.hero, null, 2));
+        console.log('Deal Data Loaded:', JSON.stringify(data.hero, null, 2));
         setDealData(data);
       } catch (err) {
         console.error('Failed to load deal:', err.message);
-        setError('Failed to load deal. Using fallback data.');
-        console.log('Using Fallback Data:', JSON.stringify(fallbackData.hero, null, 2));
-        setDealData(fallbackData);
+        setError(`Failed to load deal: ${err.message}`);
       } finally {
         setLoading(false);
       }
     }
     loadDeal();
   }, [params]);
-
-  const fallbackData = {
-    hero: {
-      title: 'Sample East Meets West Deal',
-      price: 1239,
-      originalPrice: 1376.67,
-      discount: 10,
-      nights: 5,
-      destinations: ['Bangkok', 'Phuket'],
-      images: ['https://via.placeholder.com/1200x800', 'https://via.placeholder.com/1200x800'],
-      expirationDate: new Date().toISOString(),
-    },
-    overview: { content: 'Sample overview.', videoId: '' },
-    highlights: ['Sample highlight 1', 'Sample highlight 2'],
-    itinerary: [],
-    hotels: [
-      {
-        name: 'Sample Hotel',
-        description: 'Sample hotel description.',
-        fullDescription: 'Sample full description.',
-        starRating: 4,
-        amenities: ['Free WiFi', 'Pool'],
-        roomAmenities: ['TV', 'Minibar'],
-        images: ['https://via.placeholder.com/1200x800', 'https://via.placeholder.com/1200x800'],
-      },
-    ],
-    destinations: [],
-    excursions: [],
-    finePrint: { image: '/images/placeholder.jpg', description: 'Sample fine print.' },
-    payment: { image: '/images/placeholder.jpg', description: 'Sample payment info.' },
-  };
 
   const sections = [
     { id: 'hero', label: 'Overview' },
@@ -96,16 +69,35 @@ export default function HolidayDealPage({ params }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-xl text-gray-600">Loading deal...</p>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error || !dealData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl text-red-600">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="mb-4">
+            <svg className="w-16 h-16 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Deal Not Found</h2>
+          <p className="text-gray-600 mb-6">
+            {error || 'Sorry, we couldn\'t load this deal. Please check the URL and try again.'}
+          </p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Back to Home
+          </button>
+        </div>
       </div>
     );
   }
