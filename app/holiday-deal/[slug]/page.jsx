@@ -20,7 +20,6 @@ export default function HolidayDealPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Handle params as a Promise or object
   const getSlug = async () => {
     if (params instanceof Promise) {
       const resolvedParams = await params;
@@ -35,10 +34,12 @@ export default function HolidayDealPage({ params }) {
         setLoading(true);
         const slug = await getSlug();
         const data = await fetchDealBySlug(slug);
+        console.log('Deal Data Set:', JSON.stringify(data.hero, null, 2));
         setDealData(data);
       } catch (err) {
-        console.error('Failed to fetch deal:', err);
-        setError('Failed to load deal. Please try again later.');
+        console.error('Failed to load deal:', err.message);
+        setError('Failed to load deal. Using fallback data.');
+        console.log('Using Fallback Data:', JSON.stringify(fallbackData.hero, null, 2));
         setDealData(fallbackData);
       } finally {
         setLoading(false);
@@ -49,33 +50,33 @@ export default function HolidayDealPage({ params }) {
 
   const fallbackData = {
     hero: {
-      title: 'Loading...',
-      price: 0,
-      originalPrice: 0,
-      discount: 0,
-      nights: 0,
-      destinations: [],
-      images: ['/images/placeholder.jpg'],
+      title: 'Sample East Meets West Deal',
+      price: 1239,
+      originalPrice: 1376.67,
+      discount: 10,
+      nights: 5,
+      destinations: ['Bangkok', 'Phuket'],
+      images: ['https://via.placeholder.com/1200x800', 'https://via.placeholder.com/1200x800'],
       expirationDate: new Date().toISOString(),
     },
-    overview: { content: '', videoId: '' },
-    highlights: [],
+    overview: { content: 'Sample overview.', videoId: '' },
+    highlights: ['Sample highlight 1', 'Sample highlight 2'],
     itinerary: [],
     hotels: [
       {
-        name: 'Unnamed Hotel',
-        description: 'No description available.',
-        fullDescription: 'No description available.',
-        starRating: 0,
-        amenities: [],
-        roomAmenities: [],
-        images: ['/images/placeholder.jpg'],
+        name: 'Sample Hotel',
+        description: 'Sample hotel description.',
+        fullDescription: 'Sample full description.',
+        starRating: 4,
+        amenities: ['Free WiFi', 'Pool'],
+        roomAmenities: ['TV', 'Minibar'],
+        images: ['https://via.placeholder.com/1200x800', 'https://via.placeholder.com/1200x800'],
       },
     ],
     destinations: [],
     excursions: [],
-    finePrint: { image: '/images/placeholder.jpg', description: '' },
-    payment: { image: '/images/placeholder.jpg', description: '' },
+    finePrint: { image: '/images/placeholder.jpg', description: 'Sample fine print.' },
+    payment: { image: '/images/placeholder.jpg', description: 'Sample payment info.' },
   };
 
   const sections = [
@@ -111,7 +112,6 @@ export default function HolidayDealPage({ params }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-lg z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
@@ -135,7 +135,6 @@ export default function HolidayDealPage({ params }) {
         </div>
       </nav>
 
-      {/* Sections */}
       <HeroSection deal={dealData.hero} scrollToSection={scrollToSection} />
       <OverviewSection overview={dealData.overview} />
       <HighlightsSection highlights={dealData.highlights} />
@@ -146,7 +145,6 @@ export default function HolidayDealPage({ params }) {
       <FinePrintSection finePrint={dealData.finePrint} />
       <PaymentSection payment={dealData.payment} hero={dealData.hero} />
 
-      {/* Modal */}
       <Modal
         isOpen={selectedModal !== null}
         onClose={() => setSelectedModal(null)}
@@ -154,7 +152,6 @@ export default function HolidayDealPage({ params }) {
         type={selectedModal?.type}
       />
 
-      {/* Footer */}
       <footer className="bg-gray-800 text-white py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="mb-6">
