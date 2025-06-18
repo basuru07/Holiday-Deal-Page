@@ -1,12 +1,22 @@
-export default function HighlightsSection({ highlights }) {
-  // Debug: Log the highlights data to see what we're receiving
-  console.log('Highlights data received:', highlights);
-  console.log('Highlights type:', typeof highlights);
-  console.log('Is array:', Array.isArray(highlights));
-  console.log('Length:', highlights?.length);
+"use client";
+import { useState } from "react";
 
-  // Handle case where highlights might be empty or undefined
-  if (!highlights || !Array.isArray(highlights) || highlights.length === 0) {
+export default function HighlightsSection({ highlights }) {
+  // Normalize highlights to always be an array
+  const highlightsArray = Array.isArray(highlights)
+    ? highlights
+    : highlights
+    ? [highlights]
+    : [];
+
+  // Debug: Log the highlights data
+  console.log("Highlights data received:", JSON.stringify(highlightsArray, null, 2));
+  console.log("Highlights type:", typeof highlightsArray);
+  console.log("Is array:", Array.isArray(highlightsArray));
+  console.log("Length:", highlightsArray.length);
+
+  // Handle empty highlights
+  if (highlightsArray.length === 0) {
     return (
       <section id="highlights" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -20,63 +30,86 @@ export default function HighlightsSection({ highlights }) {
     );
   }
 
-  // Function to handle image URL construction
+  // Helper function to get image URLs
   const getImageUrl = (imageUrl) => {
-    if (!imageUrl) return '/images/placeholder.jpg';
-    
-    // If it's already a full URL, return as is
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    if (!imageUrl) return "/images/placeholder.jpg";
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
       return imageUrl;
     }
-    
-    // If it starts with a slash, it's likely a relative path from the base URL
-    if (imageUrl.startsWith('/')) {
+    if (imageUrl.startsWith("/")) {
       return `https://api.techneapp-staging.site${imageUrl}`;
     }
-    
-    // Otherwise, append to base URL
     return `https://api.techneapp-staging.site/${imageUrl}`;
   };
 
+  // Helper function to format highlight descriptions
+  const formatHighlightDescription = (text) => {
+    if (!text) return "";
+
+    const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
+    let htmlOutput = "";
+    let currentList = [];
+
+    const flushList = () => {
+      if (currentList.length) {
+        htmlOutput +=
+          "<ul class='list-disc pl-6 space-y-1'>" +
+          currentList.map((item) => `<li>${item}</li>`).join("") +
+          "</ul>";
+        currentList = [];
+      }
+    };
+
+    lines.forEach((line) => {
+      if (/includes|stay|extra vibes|restaurants|attractions/i.test(line)) {
+        flushList();
+        htmlOutput += `<p class='font-semibold text-lg mt-4 mb-2 text-blue-800'>${line}</p>`;
+      } else if (line.startsWith("-") || /^[•*]/.test(line)) {
+        currentList.push(line.replace(/^[-•*]\s*/, ""));
+      } else {
+        flushList();
+        htmlOutput += `<p>${line}</p>`;
+      }
+    });
+
+    flushList();
+    return htmlOutput;
+  };
+
   return (
-    <section id="highlights" className="py-20 bg-gray-50">
+    <section id="highlights" className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">Trip Highlights</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {highlights.map((highlight, index) => (
-            <div 
-              key={highlight.id || index} 
-              className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+        <h2 className="text-4xl font-bold text-center mb-16 text-blue-900">Trip Highlights</h2>
+        <div className="max-w-4xl mx-auto">
+          {highlightsArray.map((highlight, index) => (
+            <div
+              key={highlight.id || `highlight-${index}`}
+              className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 mb-8"
             >
               {/* Highlight Image */}
-              <div className="h-64 relative overflow-hidden">
+              <div className="relative">
                 <img
                   src={getImageUrl(highlight.image || highlight.imageUrl)}
-                  alt={highlight.title || `Highlight ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  onError={(e) => { 
+                  alt={highlight.imageAlt || `Highlight ${index + 1}`}
+                  className="w-full h-80 object-cover transition-transform duration-300 hover:scale-105"
+                  onError={(e) => {
                     console.log(`Image failed to load: ${e.target.src}`);
-                    e.target.src = '/images/placeholder.jpg'; 
+                    e.target.src = "/images/placeholder.jpg";
                   }}
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                  <span className="text-white text-xl font-semibold">Discover Japan & Thailand</span>
+                </div>
               </div>
-              
-              {/* Highlight Content */}
+
+              {/* Highlight Description */}
               <div className="p-6">
-                {/* Highlight Title */}
-                {highlight.title && (
-                  <h3 className="text-xl font-semibold mb-3 text-gray-800">
-                    {highlight.title}
-                  </h3>
-                )}
-                
-                {/* Highlight Description with HTML support */}
                 <div
+                  className="text-gray-700 text-base space-y-4"
                   dangerouslySetInnerHTML={{
-                    __html: highlight.description || highlight.content || 'No description available.'
+                    __html: formatHighlightDescription(highlight.description || highlight.content || "No description available."),
                   }}
-                  className="text-gray-600 prose prose-sm max-w-none"
                 />
               </div>
             </div>
