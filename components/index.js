@@ -1,9 +1,0 @@
-export { default as HeroSection } from './HeroSection';
-export { default as OverviewSection } from './OverviewSection';
-export { default as HighlightsSection } from './HighlightsSection';
-export { default as ItinerarySection } from './ItinerarySection';
-export { default as HotelsSection } from './HotelsSection';
-export { default as DestinationsSection } from './DestinationsSection';
-export { default as ExcursionsSection } from './ExcursionsSection';
-export { default as FinePrintSection } from './FinePrintSection';
-export { default as PaymentSection } from './PaymentSection';

@@ -1,269 +1,185 @@
-"use client";
-import { useEffect, useState } from 'react';
-import { use } from 'react';
-import { fetchDeal } from '@/lib/api';
-import { HeroSection } from '@/components/HeroSection';
+'use client';
+
+import { useState, useEffect } from 'react';
+import HeroSection from '@/components/HeroSection';
 import OverviewSection from '@/components/OverviewSection';
 import HighlightsSection from '@/components/HighlightsSection';
 import ItinerarySection from '@/components/ItinerarySection';
-import { HotelsSection } from '@/components/HotelsSection';
-import { DestinationsSection } from '@/components/DestinationsSection';
+import HotelsSection from '@/components/HotelsSection';
+import DestinationsSection from '@/components/DestinationsSection';
 import ExcursionsSection from '@/components/ExcursionsSection';
 import FinePrintSection from '@/components/FinePrintSection';
-import { PaymentSection } from '@/components/PaymentSection';
+import PaymentSection from '@/components/PaymentSection';
+import Modal from '@/components/Modal';
+import { fetchDealBySlug } from '@/lib/api';
 
-export default function HolidayDealPage({ params: paramsPromise }) {
-  const params = use(paramsPromise);
-  const [deal, setDeal] = useState(null);
+export default function HolidayDealPage({ params }) {
+  const [selectedModal, setSelectedModal] = useState(null);
+  const [activeSection, setActiveSection] = useState('hero');
+  const [dealData, setDealData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Debug the params
-  console.log("Raw params:", params);
-  console.log("Params.slug:", params?.slug);
+  // Handle params as a Promise or object
+  const getSlug = async () => {
+    if (params instanceof Promise) {
+      const resolvedParams = await params;
+      return resolvedParams.slug;
+    }
+    return params.slug;
+  };
 
   useEffect(() => {
-    async function getDeal() {
+    async function loadDeal() {
       try {
-        // Decode and validate the slug
-        let slug = decodeURIComponent(params?.slug || '');
-        
-        // Check for invalid slug patterns
-        if (!slug || 
-            slug === 'undefined' || 
-            slug === '[object Object]' || 
-            slug.includes('[object Object]') ||
-            slug === 'null') {
-          console.error('Invalid slug detected:', slug);
-          throw new Error(`Invalid or missing slug parameter`);
-        }
-        
-        console.log("Fetching data for slug:", slug);
-        const data = await fetchDeal(slug);
-        
-        if (!data) {
-          throw new Error('No data received from API');
-        }
-        
-        setDeal(data);
-        setLoading(false);
+        setLoading(true);
+        const slug = await getSlug();
+        const data = await fetchDealBySlug(slug);
+        setDealData(data);
       } catch (err) {
-        console.error("Error in getDeal:", err);
-        setError(`Failed to load deal details: ${err.message}`);
+        console.error('Failed to fetch deal:', err);
+        setError('Failed to load deal. Please try again later.');
+        setDealData(fallbackData);
+      } finally {
         setLoading(false);
       }
     }
+    loadDeal();
+  }, [params]);
 
-    if (params?.slug) {
-      getDeal();
-    } else {
-      setError('No deal slug provided');
-      setLoading(false);
-    }
-  }, [params?.slug]);
+  const fallbackData = {
+    hero: {
+      title: 'Loading...',
+      price: 0,
+      originalPrice: 0,
+      discount: 0,
+      nights: 0,
+      destinations: [],
+      images: ['/images/placeholder.jpg'],
+      expirationDate: new Date().toISOString(),
+    },
+    overview: { content: '', videoId: '' },
+    highlights: [],
+    itinerary: [],
+    hotels: [
+      {
+        name: 'Unnamed Hotel',
+        description: 'No description available.',
+        fullDescription: 'No description available.',
+        starRating: 0,
+        amenities: [],
+        roomAmenities: [],
+        images: ['/images/placeholder.jpg'],
+      },
+    ],
+    destinations: [],
+    excursions: [],
+    finePrint: { image: '/images/placeholder.jpg', description: '' },
+    payment: { image: '/images/placeholder.jpg', description: '' },
+  };
 
-  // Loading state
+  const sections = [
+    { id: 'hero', label: 'Overview' },
+    { id: 'highlights', label: 'Highlights' },
+    { id: 'itinerary', label: 'Itinerary' },
+    { id: 'hotels', label: 'Hotels' },
+    { id: 'destinations', label: 'Destinations' },
+    { id: 'excursions', label: 'Excursions' },
+    { id: 'payment', label: 'Book Now' },
+  ];
+
+  const scrollToSection = (sectionId) => {
+    setActiveSection(sectionId);
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading deal details...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-gray-600">Loading...</p>
       </div>
     );
   }
 
-  // Error state
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Deal Not Found</h2>
-          <p className="text-red-600 mb-4">{error}</p>
-          <button 
-            onClick={() => window.history.back()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Go Back
-          </button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-red-600">{error}</p>
       </div>
     );
   }
-
-  // No deal data
-  if (!deal) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <p className="text-gray-600">No deal data available</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Debug: Log the entire deal object to see its structure
-  console.log("Full deal object:", deal);
-  console.log("Deal keys:", Object.keys(deal));
-
-  // Safe property access with fallbacks
-  const safeGetProperty = (obj, path, fallback = null) => {
-    if (!obj) return fallback;
-    return path.split('.').reduce((current, key) => {
-      return current && current[key] !== undefined ? current[key] : fallback;
-    }, obj);
-  };
-
-  // Check if value exists and is not empty
-  const hasValue = (value) => {
-    if (value === null || value === undefined) return false;
-    if (Array.isArray(value)) return value.length > 0;
-    if (typeof value === 'string') return value.trim().length > 0;
-    if (typeof value === 'object') return Object.keys(value).length > 0;
-    return Boolean(value);
-  };
-
-  // Extract data safely with multiple possible property names
-  const dealData = {
-    overview: safeGetProperty(deal, 'overview') || 
-              safeGetProperty(deal, 'description') || 
-              safeGetProperty(deal, 'summary'),
-    
-    videoUrl: safeGetProperty(deal, 'videoUrl') || 
-              safeGetProperty(deal, 'video_url') || 
-              safeGetProperty(deal, 'video') ||
-              safeGetProperty(deal, 'media.video'),
-    
-    highlights: safeGetProperty(deal, 'highlights') || 
-                safeGetProperty(deal, 'features') || 
-                safeGetProperty(deal, 'benefits') ||
-                [],
-    
-    itinerary: safeGetProperty(deal, 'itinerary') || 
-               safeGetProperty(deal, 'schedule') || 
-               safeGetProperty(deal, 'timeline') ||
-               safeGetProperty(deal, 'days') ||
-               [],
-    
-    hotels: safeGetProperty(deal, 'hotels') || 
-            safeGetProperty(deal, 'accommodations') || 
-            safeGetProperty(deal, 'lodging') ||
-            [],
-    
-    destinations: safeGetProperty(deal, 'destinations') || 
-                  safeGetProperty(deal, 'locations') || 
-                  safeGetProperty(deal, 'places') ||
-                  [],
-    
-    excursions: safeGetProperty(deal, 'excursions') || 
-                safeGetProperty(deal, 'activities') || 
-                safeGetProperty(deal, 'tours') ||
-                safeGetProperty(deal, 'experiences') ||
-                [],
-    
-    finePrint: safeGetProperty(deal, 'finePrint') || 
-               safeGetProperty(deal, 'fine_print') || 
-               safeGetProperty(deal, 'terms') ||
-               safeGetProperty(deal, 'terms_and_conditions'),
-    
-    payment: safeGetProperty(deal, 'payment') || 
-             safeGetProperty(deal, 'pricing') ||
-             safeGetProperty(deal, 'price') ||
-             safeGetProperty(deal, 'cost'),
-    
-    expirationDate: safeGetProperty(deal, 'expirationDate') || 
-                    safeGetProperty(deal, 'expiration_date') || 
-                    safeGetProperty(deal, 'expires_at') ||
-                    safeGetProperty(deal, 'valid_until')
-  };
-
-  // Log extracted data for debugging
-  console.log("Extracted deal data:", dealData);
-  
-  // Log which sections will be displayed
-  console.log("Sections to display:", {
-    hero: true,
-    overview: hasValue(dealData.overview),
-    highlights: hasValue(dealData.highlights),
-    itinerary: hasValue(dealData.itinerary),
-    hotels: hasValue(dealData.hotels),
-    destinations: hasValue(dealData.destinations),
-    excursions: hasValue(dealData.excursions),
-    finePrint: hasValue(dealData.finePrint),
-    payment: hasValue(dealData.payment)
-  });
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Hero Section - Always show */}
-      <HeroSection deal={deal} />
-      
-      {/* Overview Section */}
-      {hasValue(dealData.overview) && (
-        <OverviewSection 
-          overview={dealData.overview} 
-          videoUrl={dealData.videoUrl} 
-        />
-      )}
-      
-      {/* Highlights Section */}
-      {hasValue(dealData.highlights) && (
-        <HighlightsSection highlights={dealData.highlights} />
-      )}
-      
-      {/* Itinerary Section */}
-      {hasValue(dealData.itinerary) && (
-        <ItinerarySection itinerary={dealData.itinerary} />
-      )}
-      
-      {/* Hotels Section */}
-      {hasValue(dealData.hotels) && (
-        <HotelsSection hotels={dealData.hotels} />
-      )}
-      
-      {/* Destinations Section */}
-      {hasValue(dealData.destinations) && (
-        <DestinationsSection destinations={dealData.destinations} />
-      )}
-      
-      {/* Excursions Section */}
-      {hasValue(dealData.excursions) && (
-        <ExcursionsSection excursions={dealData.excursions} />
-      )}
-      
-      {/* Fine Print Section */}
-      {hasValue(dealData.finePrint) && (
-        <FinePrintSection finePrint={dealData.finePrint} />
-      )}
-      
-      {/* Payment Section */}
-      {hasValue(dealData.payment) && (
-        <PaymentSection 
-          payment={dealData.payment} 
-          expirationDate={dealData.expirationDate} 
-        />
-      )}
-      
-      {/* Debug info - Remove in production */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-yellow-100 border border-yellow-400 p-4 m-4 rounded">
-          <h3 className="font-bold">Debug Info:</h3>
-          <pre className="text-xs overflow-auto">
-            {JSON.stringify({ dealData, sections: {
-              overview: hasValue(dealData.overview),
-              highlights: hasValue(dealData.highlights),
-              itinerary: hasValue(dealData.itinerary),
-              hotels: hasValue(dealData.hotels),
-              destinations: hasValue(dealData.destinations),
-              excursions: hasValue(dealData.excursions),
-              finePrint: hasValue(dealData.finePrint),
-              payment: hasValue(dealData.payment)
-            }}, null, 2)}
-          </pre>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 bg-white shadow-lg z-40">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="font-bold text-xl text-blue-600">TravelDeals</div>
+            <div className="hidden md:flex space-x-6">
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => scrollToSection(section.id)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === section.id
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600'
+                  }`}
+                >
+                  {section.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
+      </nav>
+
+      {/* Sections */}
+      <HeroSection deal={dealData.hero} scrollToSection={scrollToSection} />
+      <OverviewSection overview={dealData.overview} />
+      <HighlightsSection highlights={dealData.highlights} />
+      <ItinerarySection itinerary={dealData.itinerary} />
+      <HotelsSection hotels={dealData.hotels} setSelectedModal={setSelectedModal} />
+      <DestinationsSection destinations={dealData.destinations} setSelectedModal={setSelectedModal} />
+      <ExcursionsSection excursions={dealData.excursions} />
+      <FinePrintSection finePrint={dealData.finePrint} />
+      <PaymentSection payment={dealData.payment} hero={dealData.hero} />
+
+      {/* Modal */}
+      <Modal
+        isOpen={selectedModal !== null}
+        onClose={() => setSelectedModal(null)}
+        data={selectedModal?.data}
+        type={selectedModal?.type}
+      />
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-12">
+        <div className="container mx-auto px-4 text-center">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold mb-2">TravelDeals</h3>
+            <p className="text-gray-400">Creating unforgettable experiences worldwide</p>
+          </div>
+          <div className="flex items-center justify-center space-x-8 mb-6">
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>
+              <span className="text-sm">24/7 Support</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a4 4 0 00-8 0 4 4 0 008 0zm-4 6a6 6 0 016-6h2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zm-6 6a6 6 0 01-6-6H2v-2a2 2 0 012-2h2a2 2 0 012 2v2H6z" /></svg>
+              <span className="text-sm">Expert Guides</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 14H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2z" /></svg>
+              <span className="text-sm">Flexible Booking</span>
+            </div>
+          </div>
+          <div className="text-sm text-gray-400">
+            © 2025 TravelDeals. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

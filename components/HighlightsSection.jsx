@@ -1,29 +1,28 @@
-import React from 'react';
-import Image from 'next/image';
-
-const HighlightsSection = ({ data }) => {
-  if (!data?.highlight_image && !data?.highlight_description) return null;
-
+export default function HighlightsSection({ highlights }) {
   return (
-    <section className="py-12 px-4 md:px-16 bg-white">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Highlights</h2>
-      <div className="grid md:grid-cols-2 gap-6 items-center">
-        {data.highlight_image && (
-          <Image
-            src={data.highlight_image}
-            alt="Highlight"
-            width={600}
-            height={400}
-            className="rounded-xl shadow"
-          />
-        )}
-        <div
-          className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: data.highlight_description }}
-        />
+    <section id="highlights" className="py-20 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">Trip Highlights</h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          {highlights.map((highlight, index) => (
+            <div key={index} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+              <div className="h-64">
+                <img 
+                  src={highlight.image || '/images/placeholder.jpg'} 
+                  alt="Highlight" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <div 
+                  dangerouslySetInnerHTML={{ __html: highlight.description }}
+                  className="text-gray-600"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
-};
-
-export default HighlightsSection;
+}

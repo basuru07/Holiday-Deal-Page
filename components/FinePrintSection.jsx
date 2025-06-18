@@ -1,29 +1,23 @@
-import React from 'react';
-import Image from 'next/image';
-
-const FinePrintSection = ({ data }) => {
-  if (!data?.fineprint_image && !data?.fineprint_description) return null;
-
+export default function FinePrintSection({ finePrint }) {
   return (
-    <section className="py-12 px-4 md:px-16 bg-gray-50">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Fine Print</h2>
-      <div className="grid md:grid-cols-2 gap-6 items-center">
-        {data.fineprint_image && (
-          <Image
-            src={data.fineprint_image}
-            alt="Fine Print"
-            width={600}
-            height={400}
-            className="rounded-xl shadow"
-          />
-        )}
-        <div
-          className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: data.fineprint_description }}
-        />
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <img 
+              src={finePrint.image || '/images/placeholder.jpg'} 
+              alt="Fine Print" 
+              className="w-full h-64 object-cover rounded-lg"
+            />
+          </div>
+          <div>
+            <div 
+              dangerouslySetInnerHTML={{ __html: finePrint.description }}
+              className="text-gray-700 space-y-4"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
-};
-
-export default FinePrintSection;
+}

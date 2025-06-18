@@ -1,38 +1,40 @@
-"use client";
+import { useState, useEffect } from 'react';
 
-import React, { useEffect, useState } from 'react';
+export default function CountdownTimer({ targetDate }) {
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
-const CountdownTimer = ({ expiryDate }) => {
-  const [timeLeft, setTimeLeft] = useState('');
+  function calculateTimeLeft() {
+    const difference = +new Date(targetDate) - +new Date();
+    let timeLeft = {};
+
+    if (difference > 0) {
+      timeLeft = {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    }
+
+    return timeLeft;
+  }
 
   useEffect(() => {
-    const countDown = () => {
-      const end = new Date(expiryDate).getTime();
-      const now = new Date().getTime();
-      const distance = end - now;
+    const timer = setTimeout(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
 
-      if (distance < 0) {
-        setTimeLeft('Deal expired');
-        return;
-      }
+    return () => clearTimeout(timer);
+  });
 
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hrs = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const secs = Math.floor((distance % (1000 * 60)) / 1000);
-
-      setTimeLeft(`${days}d ${hrs}h ${mins}m ${secs}s`);
-    };
-
-    // run immediately so the timer shows without delay
-    countDown();
-
-    const interval = setInterval(countDown, 1000);
-
-    return () => clearInterval(interval);
-  }, [expiryDate]);
-
-  return <p className="font-bold text-red-500">Expires in: {timeLeft}</p>;
-};
-
-export default CountdownTimer;
+  return (
+    <div className="flex space-x-4 text-center">
+      {Object.keys(timeLeft).map((interval) => (
+        <div key={interval} className="bg-red-100 px-4 py-2 rounded-lg">
+          <div className="text-2xl font-bold text-red-600">{timeLeft[interval]}</div>
+          <div className="text-sm text-red-500 capitalize">{interval}</div>
+        </div>
+      ))}
+    </div>
+  );
+}

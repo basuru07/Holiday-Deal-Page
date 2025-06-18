@@ -1,17 +1,15 @@
-"use client";
-import { useState } from 'react';
-import { DestinationCard } from './DestinationCard';
+import DestinationCard from './DestinationCard';
 
-export function DestinationsSection({ destinations }) {
-  if (!destinations?.length) return null;
-
+export default function DestinationsSection({ destinations, setSelectedModal }) {
   return (
-    <section className="py-10 bg-gray-100">
-      <h2 className="text-3xl font-bold text-center mb-8">Destinations</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-        {destinations.map((destination, index) => (
-          <DestinationCard key={index} destination={destination} />
-        ))}
+    <section id="destinations" className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">Destinations You'll Visit</h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          {destinations.map((destination, index) => (
+            <DestinationCard key={index} destination={destination} setSelectedModal={setSelectedModal} />
+          ))}
+        </div>
       </div>
     </section>
   );
