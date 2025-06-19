@@ -1,4 +1,4 @@
-// components/DestinationsSection.jsx - Updated component
+// components/DestinationsSection.jsx
 import React from 'react';
 import DestinationCard from './DestinationCard';
 
