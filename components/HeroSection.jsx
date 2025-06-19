@@ -3,12 +3,14 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+const imageBaseUrl = 'https://api.techneapp-staging.site/';
+
 const ImageSlider = ({ images, autoplay = true }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const validImages = Array.isArray(images) && images.length > 0 ? 
-                      images.filter(img => typeof img === 'string' && img) : 
-                      ['/images/placeholder.jpg'];
+  const validImages = Array.isArray(images) && images.length > 0
+    ? images.filter((img) => typeof img === 'string' && img)
+    : ['https://via.placeholder.com/1920x1080?text=No+Image'];
 
   useEffect(() => {
     if (autoplay && validImages.length > 1) {
@@ -29,9 +31,9 @@ const ImageSlider = ({ images, autoplay = true }) => {
 
   return (
     <div className="relative w-full h-full group">
-      <img 
-        src={validImages[currentIndex]} 
-        alt="Hero Slider" 
+      <img
+        src={validImages[currentIndex]}
+        alt="Hero Slider"
         className="w-full h-full object-cover"
       />
       {validImages.length > 1 && (
@@ -66,25 +68,29 @@ const ImageSlider = ({ images, autoplay = true }) => {
 };
 
 export default function HeroSection({ deal, scrollToSection }) {
-  console.log('HeroSection deal received:', JSON.stringify(deal, null, 2));
+  // Extract only image URLs from deal.heroImages
+  const heroImages = Array.isArray(deal?.heroImages) && deal.heroImages.length > 0
+    ? deal.heroImages
+        .filter((img) => img?.path)
+        .map((img) => `${imageBaseUrl}${img.path}`)
+    : ['https://via.placeholder.com/1920x1080?text=No+Image'];
 
+  // Extract other deal data safely
   const safeDeal = {
     title: deal?.title || 'No Title Available',
     price: Number(deal?.price) || 0,
     originalPrice: Number(deal?.originalPrice) || 0,
     discount: Number(deal?.discount) || 0,
     nights: Number(deal?.nights) || 0,
-    destinations: Array.isArray(deal?.destinations) ? 
-                  deal.destinations.filter(dest => typeof dest === 'string' && dest) : [],
-    images: Array.isArray(deal?.images) ? 
-            deal.images.filter(img => typeof img === 'string' && img) : 
-            ['/images/placeholder.jpg'],
+    destinations: Array.isArray(deal?.destinations)
+      ? deal.destinations.filter((dest) => typeof dest === 'string' && dest)
+      : [],
   };
 
   return (
     <section id="hero" className="relative h-screen mt-16">
       <div className="absolute inset-0">
-        <ImageSlider images={safeDeal.images} />
+        <ImageSlider images={heroImages} />
       </div>
       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
         <div className="text-center text-white max-w-4xl px-4">
@@ -121,7 +127,7 @@ export default function HeroSection({ deal, scrollToSection }) {
           ) : (
             <p className="text-sm text-gray-400 mb-6">No destinations listed</p>
           )}
-          <button 
+          <button
             onClick={() => scrollToSection('payment')}
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-full text-lg transition-transform duration-200 hover:scale-105 shadow-md"
           >

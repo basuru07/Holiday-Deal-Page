@@ -41,6 +41,10 @@ export default function HolidayDealPage({ params }) {
         
         const data = await fetchDealBySlug(slug);
         console.log('Deal Data Loaded:', JSON.stringify(data.hero, null, 2));
+        console.log('Hero Images:', data.hero.images);
+        console.log('Highlights with images:', data.highlights.map(h => ({ title: h.title, image: h.image })));
+        console.log('Hotels with images:', data.hotels.map(h => ({ name: h.name, mainImage: h.mainImage, images: h.images })));
+        
         setDealData(data);
       } catch (err) {
         console.error('Failed to load deal:', err.message);
