@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Holiday Deal Page
 
-## Getting Started
+A modern, responsive Next.js application for showcasing holiday travel deals with dynamic routing and interactive components.
 
-First, run the development server:
+## 🌟 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Dynamic Holiday Deal Pages**: Custom routes for each holiday package
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Interactive Components**: Image sliders, modals, and dynamic sections
+- **Modern UI**: Built with Tailwind CSS for sleek styling
+- **Modular Architecture**: Organized component structure for maintainability
+
+## 🚀 Live Demo
+
+Visit the live application: [https://holidaydealpage.netlify.app/holiday-deal/east-meets-west-kyoto-bangkok-phuket-whv1521](https://holidaydealpage.netlify.app/holiday-deal/east-meets-west-kyoto-bangkok-phuket-whv1521)
+
+## 📁 Project Structure
+
+```
+holiday-deal-page/
+├── app/
+│   ├── globals.css              # Global styles
+│   ├── layout.js                # Root layout component
+│   ├── page.js                  # Home page
+│   └── holiday-deal/
+│       └── [slug]/
+│           └── page.js          # Dynamic holiday deal pages
+├── components/
+│   ├── HeroSection.js           # Hero banner component
+│   ├── OverviewSection.js       # Deal overview section
+│   ├── HighlightsSection.js     # Package highlights
+│   ├── ItinerarySection.js      # Travel itinerary display
+│   ├── HotelsSection.js         # Hotel information
+│   ├── DestinationsSection.js   # Destination details
+│   ├── ExcursionsSection.js     # Available excursions
+│   ├── FinePrintSection.js      # Terms and conditions
+│   ├── PaymentSection.js        # Payment information
+│   ├── ImageSlider.js           # Image carousel component
+│   └── Modal.js                 # Modal dialog component
+├── lib/
+│   └── api.js                   # API utilities and data fetching
+├── public/
+│   └── images/
+│       └── placeholder.jpg      # Static assets
+└── package.json                 # Project dependencies
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tech Stack
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- **Framework**: Next.js 14 with App Router
+- **Styling**: Tailwind CSS
+- **Language**: JavaScript
+- **Deployment**: Netlify
+- **Package Manager**: npm/yarn
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📦 Installation
 
-## Learn More
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/basuru07/Holiday-Deal-Page.git
+   cd holiday-deal-page
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Run the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Netlify (Current)
+The project is currently deployed on Netlify. To deploy your own version:
+
+1. Fork/clone this repository
+2. Connect your repository to Netlify
+3. Set build command: `npm run build`
+4. Set publish directory: `out` or `.next` (depending on configuration)
+5. Deploy!
+
+
+## 📱 Usage
+
+### Adding New Holiday Deals
+1. Create deal data in `lib/api.js`
+2. The dynamic route `app/holiday-deal/[slug]/page.js` will automatically handle new URLs
+3. Ensure your slug matches the data structure
+
+### Customizing Components
+Each component in the `components/` directory can be customized:
+- `HeroSection.js` - Update hero banner content
+- `ItinerarySection.js` - Modify itinerary display logic
+- `ImageSlider.js` - Customize image carousel behavior
