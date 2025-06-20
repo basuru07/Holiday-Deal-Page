@@ -1,15 +1,18 @@
 export default function ItinerarySection({ itinerary }) {
-  // Debug logging
-  console.log('Itinerary data received:', itinerary);
+  console.log("Itinerary data received:", itinerary);
 
-  // Handle empty or invalid itinerary data
+  // Handle empty or invalid data
   if (!Array.isArray(itinerary) || itinerary.length === 0) {
     return (
       <section id="itinerary" className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">Day by Day Itinerary</h2>
+          <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">
+            Day by Day Itinerary
+          </h2>
           <div className="max-w-4xl mx-auto text-center">
-            <p className="text-gray-500 text-lg">No itinerary information available.</p>
+            <p className="text-gray-500 text-lg">
+              No itinerary information available.
+            </p>
           </div>
         </div>
       </section>
@@ -19,7 +22,9 @@ export default function ItinerarySection({ itinerary }) {
   return (
     <section id="itinerary" className="py-20 bg-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">Day by Day Itinerary</h2>
+        <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">
+          Day by Day Itinerary
+        </h2>
 
         {/* Row-wise scrollable itinerary */}
         <div className="flex gap-6 overflow-x-auto pb-4 px-1">
@@ -54,7 +59,9 @@ export default function ItinerarySection({ itinerary }) {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span className="text-sm font-medium text-blue-600">{day.location}</span>
+                  <span className="text-sm font-medium text-blue-600">
+                    {day.location}
+                  </span>
                 </div>
               )}
 
@@ -62,7 +69,7 @@ export default function ItinerarySection({ itinerary }) {
               <div
                 className="text-gray-700 text-sm prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{
-                  __html: day.description || 'No description available',
+                  __html: day.description || "No description available",
                 }}
               />
             </div>

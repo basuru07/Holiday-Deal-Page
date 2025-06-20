@@ -1,5 +1,4 @@
-// CountdownTimer.jsx - This is a standalone component
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export default function CountdownTimer({ targetDate }) {
   // Internal state management
@@ -7,12 +6,12 @@ export default function CountdownTimer({ targetDate }) {
     days: 0,
     hours: 0,
     minutes: 0,
-    seconds: 0
+    seconds: 0,
   });
 
   useEffect(() => {
     if (!targetDate) return; // Guard clause if no date provided
-    
+
     const timer = setInterval(() => {
       const now = new Date();
       const target = new Date(targetDate);
@@ -25,7 +24,9 @@ export default function CountdownTimer({ targetDate }) {
 
       setTimeLeft({
         days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        hours: Math.floor(
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        ),
         minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
         seconds: Math.floor((difference % (1000 * 60)) / 1000),
       });

@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 
 const BASE_URL = "https://api.techneapp-staging.site/";
 
@@ -107,7 +106,9 @@ export default function HighlightsSection({ highlights }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                   <span className="text-white text-xl font-semibold">
-                    {highlight.title || highlight.overlayText || `Highlight ${index + 1}`}
+                    {highlight.title ||
+                      highlight.overlayText ||
+                      `Highlight ${index + 1}`}
                   </span>
                 </div>
               </div>
